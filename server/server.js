@@ -32,6 +32,10 @@ const startApolloServer = async () => {
     });
   }
 
+  app.get('/', (req, res) => {
+    res.send('Hello World!');
+  });
+
   db.once('open', () => {
     app.listen(PORT, () => {
       console.log(`API server running on port ${PORT}!`);
