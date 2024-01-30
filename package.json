@@ -1,0 +1,19 @@
+{
+  "name": "googlebooks-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "concurrently \"cd server && yarn run watch\" \"cd client && yarn dev\"",
+    "install": "cd server && yarn && cd ../client && yarn",
+    "seed": "cd server && yarn run seed",
+    "build": "cd client && yarn run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
