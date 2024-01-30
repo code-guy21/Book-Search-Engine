@@ -63,7 +63,7 @@ const SearchBooks = () => {
   };
 
   // Bring GraphQL query in with useMutation Hook
-  const [SaveBook, { error }] = useMutation(SAVE_BOOK);
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
@@ -72,7 +72,7 @@ const SearchBooks = () => {
     // console.log('bookToSave', bookToSave)
 
     try {
-      const { data } = await SaveBook({
+      const { data } = await saveBook({
         variables: {
           book: bookToSave,
         },
