@@ -6,6 +6,8 @@ const { authMiddleware } = require('./utils/auth');
 const { typeDefs, resolvers } = require('./schemas/index');
 const db = require('./config/connection');
 
+require('dotenv').config();
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 const server = new ApolloServer({
@@ -31,10 +33,6 @@ const startApolloServer = async () => {
       res.sendFile(path.join(__dirname, '../client/dist/index.html'));
     });
   }
-
-  app.get('/', (req, res) => {
-    res.send('Hello World!');
-  });
 
   db.once('open', () => {
     app.listen(PORT, () => {
