@@ -1,73 +1,49 @@
-import { useState, useEffect } from "react";
+/* eslint-disable no-unused-vars */
+// import { useState, useEffect } from 'react';
+import { useMutation, useQuery } from "@apollo/client";
 import { Container, Card, Button, Row, Col } from "react-bootstrap";
 
-import { getMe, deleteBook } from "../utils/API";
-import Auth from "../utils/auth";
+import { Link } from "react-router-dom";
 import { removeBookId } from "../utils/localStorage";
+import { GET_ME } from "./../utils/queries";
+import { DELETE_BOOK } from "./../utils/mutations";
 
 const SavedBooks = () => {
-  const [userData, setUserData] = useState({});
+  // Retrived Logged in User records and attached savedBooks for rendering
+  const { data, loading } = useQuery(GET_ME);
+  // console.log(data)
+  // Store data as "userData" for rendering
+  let userData = data?.me || {};
 
-  // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
+  // Delete book route
+  const [deleteBook, { error }] = useMutation(DELETE_BOOK);
 
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-        if (!token) {
-          return false;
-        }
-
-        const response = await getMe(token);
-
-        if (!response.ok) {
-          throw new Error("something went wrong!");
-        }
-
-        const user = await response.json();
-        setUserData(user);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getUserData();
-  }, [userDataLength]);
-
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-    if (!token) {
-      return false;
-    }
-
+    // console.log ("handleDeleteBook called")
     try {
-      const response = await deleteBook(bookId, token);
+      // Remove book from user record
+      const { data } = await deleteBook({
+        variables: {
+          bookId: bookId,
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error("something went wrong!");
-      }
+      // console.log("data", data)
 
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
-      // upon success, remove book's id from localStorage
+      //Remove bookID from local storage
       removeBookId(bookId);
     } catch (err) {
-      console.error(err);
+      console.log(JSON.stringify(err, null, 2)); //Much better error reporting for GraphQl issues
     }
   };
 
-  // if data isn't here yet, say so
-  if (!userDataLength) {
+  if (loading) {
     return <h2>LOADING...</h2>;
   }
 
   return (
     <>
-      <div fluid className="text-light bg-dark p-5">
+      <div className="fluid text-light bg-dark p-5">
         <Container>
           <h1>Viewing saved books!</h1>
         </Container>
@@ -75,16 +51,19 @@ const SavedBooks = () => {
       <Container>
         <h2 className="pt-5">
           {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${
-                userData.savedBooks.length === 1 ? "book" : "books"
-              }:`
+            ? `Viewing ${userData.savedBooks.length} saved
+                                ${
+                                  userData.savedBooks.length === 1
+                                    ? "book"
+                                    : "books"
+                                }:`
             : "You have no saved books!"}
         </h2>
         <Row>
           {userData.savedBooks.map((book) => {
             return (
-              <Col md="4">
-                <Card key={book.bookId} border="dark">
+              <Col key={book.bookId} md="4">
+                <Card border="dark">
                   {book.image ? (
                     <Card.Img
                       src={book.image}
@@ -93,7 +72,11 @@ const SavedBooks = () => {
                     />
                   ) : null}
                   <Card.Body>
-                    <Card.Title>{book.title}</Card.Title>
+                    <Card.Title>
+                      <Link to={book.link} target="_blank">
+                        {book.title}
+                      </Link>
+                    </Card.Title>
                     <p className="small">Authors: {book.authors}</p>
                     <Card.Text>{book.description}</Card.Text>
                     <Button
